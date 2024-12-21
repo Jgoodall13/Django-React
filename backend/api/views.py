@@ -3,7 +3,9 @@ from rest_framework.response import Response
 from rest_framework import status
 from django.shortcuts import get_object_or_404
 from .models import Task
+from .models import Language
 from .serializers import TaskSerializer
+from .serializers import LanguageSerializer
 
 # List all tasks or create a new task
 @api_view(['GET', 'POST'])
@@ -34,3 +36,17 @@ def delete_task(request, pk):
     task = get_object_or_404(Task, pk=pk)
     task.delete()
     return Response({'message': 'Task deleted successfully'}, status=204)
+  
+@api_view(['GET', 'POST'])
+def language_list(request):
+    if request.method == 'GET':
+        languages = Language.objects.all()
+        serializer = LanguageSerializer(languages, many=True)
+        return Response(serializer.data)
+
+    elif request.method == 'POST':
+        serializer = LanguageSerializer(data=request.data)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
